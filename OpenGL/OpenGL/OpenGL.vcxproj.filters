@@ -40,5 +40,14 @@
     <Image Include="texture1.png">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="texture2.jpg">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="texture3.jpg">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="texture4.jpg">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>

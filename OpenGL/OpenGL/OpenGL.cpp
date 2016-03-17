@@ -24,7 +24,10 @@ class App
     static const int width = 640;
     static const int height = 480;
 
-    GLuint textureId;
+    GLuint textureId1;
+    GLuint textureId2;
+    GLuint textureId3;
+    GLuint textureId4;
 
 public:
     App()
@@ -65,21 +68,29 @@ private:
 
     void initTexture()
     {
-        // 画像データを読み込む
-        auto image = cv::imread("texture1.png");
-        cv::cvtColor( image, image, CV_BGR2RGBA );
+        auto loadTexture = []( const char* fileName, GLuint* textureId )
+        {
+            // 画像データを読み込む
+            auto image = cv::imread( fileName );
+            cv::cvtColor( image, image, CV_BGR2RGBA );
 
-        // テクスチャを作成する
-        glGenTextures( 1, &textureId );
-        glBindTexture( GL_TEXTURE_2D, textureId );
+            // テクスチャを作成する
+            glGenTextures( 1, textureId );
+            glBindTexture( GL_TEXTURE_2D, *textureId );
 
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data );
+            glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data );
 
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        };
+
+        loadTexture( "texture1.png", &textureId1 );
+        loadTexture( "texture2.jpg", &textureId2 );
+        loadTexture( "texture3.jpg", &textureId3 );
+        loadTexture( "texture4.jpg", &textureId4 );
     }
 
     static void displayHandler()
@@ -92,20 +103,52 @@ private:
         glClear( GL_COLOR_BUFFER_BIT );
         glClearColor( 0.0, 0.0, 0.0, 1.0 );
 
-        // 四角を書く
-        {
+        auto drawTexture = []( GLuint textureId,  const float* vertexes ) {
+            glBindTexture( GL_TEXTURE_2D, textureId );
+
             // テクスチャを有効にする
             glEnable( GL_TEXTURE_2D );
 
             // テクスチャを適用した四角形を描く
             glBegin( GL_QUADS );
-            glTexCoord2d( 0.0, 1.0 ); glVertex3d( -1.0, -1.0, 0.0 );
-            glTexCoord2d( 1.0, 1.0 ); glVertex3d( 1.0, -1.0, 0.0 );
-            glTexCoord2d( 1.0, 0.0 ); glVertex3d( 1.0, 1.0, 0.0 );
-            glTexCoord2d( 0.0, 0.0 ); glVertex3d( -1.0, 1.0, 0.0 );
+            glTexCoord2d( 0.0, 1.0 ); glVertex3d( vertexes[0], vertexes[1], vertexes[2] );
+            glTexCoord2d( 1.0, 1.0 ); glVertex3d( vertexes[3], vertexes[4], vertexes[5] );
+            glTexCoord2d( 1.0, 0.0 ); glVertex3d( vertexes[6], vertexes[7], vertexes[8] );
+            glTexCoord2d( 0.0, 0.0 ); glVertex3d( vertexes[9], vertexes[10], vertexes[11] );
             glEnd();
 
             glDisable( GL_TEXTURE_2D );
+        };
+
+        // 四角を書く
+        {
+            float vertexes1[] = { 
+                -1.0, 0.0, 0.0,
+                 0.0, 0.0, 0.0,
+                 0.0, 1.0, 0.0,
+                -1.0, 1.0, 0.0 };
+            drawTexture( textureId1, vertexes1 );
+
+            float vertexes2[] = {
+                0.0, 0.0, 0.0,
+                1.0, 0.0, 0.0,
+                1.0, 1.0, 0.0,
+                0.0, 1.0, 0.0 };
+            drawTexture( textureId2, vertexes2 );
+
+            float vertexes3[] = {
+                -1.0, -1.0, 0.0,
+                0.0, -1.0, 0.0,
+                0.0, 0.0, 0.0,
+                -1.0, 0.0, 0.0 };
+            drawTexture( textureId3, vertexes3 );
+
+            float vertexes4[] = {
+                0.0, -1.0, 0.0,
+                1.0, -1.0, 0.0,
+                1.0, 0.0, 0.0,
+                0.0, 0.0, 0.0 };
+            drawTexture( textureId4, vertexes4 );
         }
 
         glFlush();
