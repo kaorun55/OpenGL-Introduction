@@ -1,8 +1,8 @@
 # OpenGL-Introduction
 OpenGLの練習です
 
- - テンプレート(四角を書く)
- - テクスチャを表示
- - マルチテクスチャ
- - シェーダー
- - FBO(Frame Buffer Object)
+ - master:テンプレート(四角を書く)
+ - chapter1:テクスチャを表示
+ - chapter2:マルチテクスチャ
+ - chapter3:シェーダー
+ - chapter4:FBO(Frame Buffer Object)
