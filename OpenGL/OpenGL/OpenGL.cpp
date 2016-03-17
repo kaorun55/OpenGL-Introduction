@@ -15,12 +15,16 @@
 #include <GL\glew.h>
 #include <GL\glut.h>
 
+#include <opencv2\opencv.hpp>
+
 class App
 {
     static App* app;
 
     static const int width = 640;
     static const int height = 480;
+
+    GLuint textureId;
 
 public:
     App()
@@ -30,21 +34,8 @@ public:
 
     void init( int argc, char* argv[] )
     {
-        glutInit( &argc, argv );
-        glutInitDisplayMode( GLUT_RGB );
-        glutInitWindowSize( width, height );
-        glutCreateWindow( "OPenGL" );
-
-        glutIdleFunc( displayHandler );
-        glutDisplayFunc( displayHandler );
-        //glutKeyboardFunc( keyboard );
-
-        // GLEW の初期化 
-        GLenum err = glewInit();
-        if ( err != GLEW_OK ) {
-            fprintf( stdout, "Error: %s\n", glewGetErrorString( err ) );
-            throw std::runtime_error( std::string( "Error: " ) += std::string( (char*)glewGetErrorString( err ) ) );
-        }
+        initOpenGL( argc, argv );
+        initTexture();
     }
 
     void run()
@@ -53,6 +44,43 @@ public:
     }
 
 private:
+
+    void initOpenGL( int argc, char* argv[] )
+    {
+        glutInit( &argc, argv );
+        glutInitDisplayMode( GLUT_RGB );
+        glutInitWindowSize( width, height );
+        glutCreateWindow( "OpenGL" );
+
+        glutIdleFunc( displayHandler );
+        glutDisplayFunc( displayHandler );
+        //glutKeyboardFunc( keyboard );
+
+        // GLEW の初期化 
+        GLenum err = glewInit();
+        if ( err != GLEW_OK ) {
+            throw std::runtime_error( std::string( "Error: " ) += std::string( (char*)glewGetErrorString( err ) ) );
+        }
+    }
+
+    void initTexture()
+    {
+        // 画像データを読み込む
+        auto image = cv::imread("texture1.png");
+        cv::cvtColor( image, image, CV_BGR2RGBA );
+
+        // テクスチャを作成する
+        glGenTextures( 1, &textureId );
+        glBindTexture( GL_TEXTURE_2D, textureId );
+
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data );
+
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    }
 
     static void displayHandler()
     {
@@ -65,12 +93,20 @@ private:
         glClearColor( 0.0, 0.0, 0.0, 1.0 );
 
         // 四角を書く
-        glBegin( GL_QUADS );
-        glColor3f( 1.0, 0.0, 0.0 ); glVertex3d( -0.5, -0.5, 0.0 );
-        glColor3f( 1.0, 1.0, 0.0 ); glVertex3d( 0.5, -0.5, 0.0 );
-        glColor3f( 1.0, 1.0, 1.0 ); glVertex3d( 0.5, 0.5, 0.0 );
-        glColor3f( 1.0, 0.0, 1.0 ); glVertex3d( -0.5, 0.5, 0.0 );
-        glEnd();
+        {
+            // テクスチャを有効にする
+            glEnable( GL_TEXTURE_2D );
+
+            // テクスチャを適用した四角形を描く
+            glBegin( GL_QUADS );
+            glTexCoord2d( 0.0, 1.0 ); glVertex3d( -1.0, -1.0, 0.0 );
+            glTexCoord2d( 1.0, 1.0 ); glVertex3d( 1.0, -1.0, 0.0 );
+            glTexCoord2d( 1.0, 0.0 ); glVertex3d( 1.0, 1.0, 0.0 );
+            glTexCoord2d( 0.0, 0.0 ); glVertex3d( -1.0, 1.0, 0.0 );
+            glEnd();
+
+            glDisable( GL_TEXTURE_2D );
+        }
 
         glFlush();
     }
